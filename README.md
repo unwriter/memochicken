@@ -2,7 +2,7 @@
 
 Post a memo, feed the chicken.
 
-![memochicken](./memochicken.png)
+![screenshot](./screenshot.png)
 
 > This project is a remix of an already-really-cool project set up by [Spencer Lambert](https://twitter.com/SpencerLambert), which lets you pay bitcoin cash to feed chickens.
 >
@@ -11,6 +11,8 @@ Post a memo, feed the chicken.
 Feeding the chickens is cool but, what if you could add personal messages to the food? That will surely warm the hearts of all the chickens instead of not knowing who the secret donor is.
 
 Well worry no more! Now you can send a very personal message along with the food, powered by Memo!
+
+![memochicken](./memochicken.png)
 
 Here's how it works.
 
