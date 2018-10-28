@@ -18,7 +18,7 @@ Here's how it works.
 
 1. **Moneybutton:** Construct a BCH transaction using [Moneybutton](https://moneybutton.com)
 2. **Memo.cash:** The transaction is a Memo.cash post (0x6d02) with a hashtag "#memochicken" as described at https://memo.cash/protocol
-3. **Bitsocket:** Memochicken has a relayer server daemon component that uses [Bitsocket](https://bitsocket.org) to monitor the blockchain, ONLY to listen to `0x6d02` transactions that make a payment to the Memochicken relayer server.
+3. **Bitsocket:** Memochicken has a relayer server daemon component that uses [Bitsocket](https://bitsocket.org) to monitor the blockchain, ONLY to listen to `0x6d02` transactions that make a payment to the relayer server's bitcoin address.
 4. **Handcash:** When a relevant Bitsocket event comes in, the Memochicken relayer looks to see if the amount is more than 50cents. If it is, it creates an additional transaction to tha [Handcash](https://handcash.io) handle `$chicken` and broadcasts it.
 5. **CryptoCandy:** The [Crypto Candy Machine](https://www.iozeta.com/product/cryptocandy/) set up by [Spencer Lambert](https://twitter.com/SpencerLambert) dispenses chicken feed. Chickens overcome hunger.
 6. **Twitch:** The `$chicken` handle is being livecasted on Twitch at https://www.twitch.tv/redpepper261. This app embeds the Twitch stream to provide a single page all-in-one experience.
