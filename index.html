@@ -1,0 +1,215 @@
+<html>
+<head>
+<script src="https://api.moneybutton.com/moneybutton.js"></script>
+<script src='https://unpkg.com/datacash'></script>
+<script src='https://unpkg.com/databutton'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: "Helvetica Neue", helvetica, arial;
+}
+iframe {
+  border: none;
+}
+.form {
+  position: fixed;
+  z-index: 100000;
+  display: flex;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px;
+  background: rgba(0,0,0,0.5);
+  align-items: center;
+}
+.form #msg {
+  flex-grow: 1;
+  padding: 10px;
+}
+.form .btn {
+  text-decoration: none;
+  width: 100px;
+  color: black;
+  background:gold; 
+  text-align: center;
+  padding: 10px;
+}
+#modal {
+  position: fixed;
+  top: 40%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 50px;
+}
+.hidden {
+  display: none;
+}
+.caption {
+  color: white;
+  padding: 10px;
+  border-radius: 40px;
+  margin-bottom: 30px;
+  background: rgba(0,0,0,0.7);
+}
+.feed {
+  z-index: 100000000;
+  position: fixed;
+  right: 0;
+  top: 100px;
+  bottom: 100px;
+  overflow: auto;
+  font-size: 12px;
+  width: 200px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 10px;
+}
+.outlink {
+  color: silver;
+}
+.row {
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+h2 {
+  margin: 0 0 10px 0;
+}
+div {
+  display: block;
+  color: white;
+}
+a {
+  color: gold;
+}
+.well {
+  margin: 10px 0;
+  padding: 5px;
+  background: rgba(255,255,255,0.1);
+}
+</style>
+<script id="template" type="text/x-handlebars-template">
+  {{#each items}}
+    <div class='row'>
+      <div class='msg'>{{message}}</div>
+      <a target='_blank' class='outlink' href='https://memo.cash/post/{{tx}}'>view on memo</a>
+    </div>
+  {{/each}}
+</script>
+<script>
+var source   = document.getElementById("template").innerHTML;
+var template = Handlebars.compile(source);
+var query = {
+  v: 3,
+  q: {
+    find: {
+      "out.h1": "6d02",
+      "out.s2": {
+        "$regex": "#memochicken", "$options": "i"
+      }
+    }
+  },
+  r: {
+    f: "[ .[] | .tx.h as $tx | .out[] | select(.b0.op and .b0.op == 106) | { tx: $tx, message: .s2 }]"
+  }
+}
+var feed = function(uri) {
+  console.log("rendering feed")
+  var header = { headers: { key: "qqjtyk2qmphm4d2ddqfeg855we2u4ly7m59a0tuenn" } };
+  fetch(uri, header).then(function(r) {
+    return r.json()
+  }).then(function(r) {
+    var unconfirmed_feed = template({items: r.u})
+    var confirmed_feed = template({items: r.c})
+    document.querySelector(".feed .items").innerHTML = unconfirmed_feed + confirmed_feed
+  })
+}
+var convert = function(amount, unit) {
+  return new Promise(function(resolve, reject) {
+    fetch("https://api.coinbase.com/v2/exchange-rates?currency=BCH")
+    .then(function(res) {
+      return res.json()
+    })
+    .then(function(currency) {
+      let rate = currency.data.rates[unit]
+      let converted = (amount / rate) * 100000000
+      resolve(converted)
+    })
+  })
+}
+document.addEventListener("DOMContentLoaded", function() {
+  // iframe init
+  var iframe = document.createElement("iframe");
+  iframe.src= "https://player.twitch.tv/?channel=redpepper261";
+  iframe.frameborder="0"
+  iframe.allowfullscreen="true"
+  iframe.scrolling="no"
+  iframe.height = "" + window.innerHeight;
+  iframe.width = "" + window.innerWidth;
+  document.body.appendChild(iframe)
+
+  // feed init
+  var b64 = btoa(JSON.stringify(query));
+  var uri = "https://bitdb.network/q/" + b64;
+  feed(uri)
+
+  // Push
+  var bitsocket = new EventSource('https://bitsocket.org/s/'+b64)
+  bitsocket.onmessage = function(e) {
+    feed(uri)
+  }
+
+  // posting UI
+  document.querySelector("#done").addEventListener("click", function(e) {
+    document.querySelector("#modal").classList.remove('hidden')
+    let message = document.querySelector("#msg").value
+    convert(0.51, "USD")
+    .then(function(amount) {
+      databutton.build({
+        data: ["0x6d02", message + " #memochicken"],
+        button: {
+          $el: "#button",
+          $cash: {
+            to: [{
+              address: "qq4kp3w3yhhvy4gm4jgeza4vus8vpxgrwc90n8rhxe",
+              value: amount
+            }]
+          },
+          label: "Slide to Feed!",
+          onPayment: function(e) {
+            console.log("paid!", e)
+            setTimeout(function() {
+              feed(uri)
+              document.querySelector("#modal").classList.add('hidden')
+            }, 2000)
+          }
+        }
+      })
+    })
+  })
+})
+</script>
+</head>
+<body>
+  <div class='form'>
+    <input id='msg' placeholder='Send a memo to the chickens to feed them!'></input>
+    <a href='#' id='done' class='btn'><i class='fas fa-kiwi-bird'></i> Feed!</a>
+  </div>
+  <div id='modal' class='hidden'>
+    <div class='caption'>Slide the button, feed the chicken!</div>
+    <div id='button'></div>
+  </div>
+  <div class='feed'>
+    <h2><i class='fas fa-kiwi-bird'></i> memochicken</h2>
+    <div>Post a memo, feed the chicken.</div>
+    <div class='well'>Powered by <a href="#">Moneybutton + Memo.cash + Bitsocket + BitDB + HandCash + The Great "Twitch feeds $Chicken"</a></div>
+    <div class='items'></div>
+  </div>
+</body>
+</html>

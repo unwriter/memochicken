@@ -1,0 +1,14 @@
+{
+  "name": "memochicken",
+  "version": "0.0.1",
+  "description": "post a memo, feed the chicken",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "datacash": "^1.2.0",
+    "dotenv": "^6.1.0",
+    "eventsource": "^1.0.7"
+  }
+}
